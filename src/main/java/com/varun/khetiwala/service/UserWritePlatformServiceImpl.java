@@ -3,9 +3,13 @@ package com.varun.khetiwala.service;
 import com.varun.khetiwala.domain.RoleEnum;
 import com.varun.khetiwala.domain.User;
 import com.varun.khetiwala.exception.PlatformDataIntegrityException;
+import com.varun.khetiwala.helper.JsonCommand;
 import com.varun.khetiwala.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class UserWritePlatformServiceImpl implements UserWritePlatformService{
@@ -39,11 +43,19 @@ public class UserWritePlatformServiceImpl implements UserWritePlatformService{
         }
     }
 
+@Override
+    public Map<String, Object> updateUser(Long id, JsonCommand command) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-    @Override
-    public User updateUser(User user) {
-        return null;
+        Map<String, Object> changes = user.update(command);
+
+        if (!changes.isEmpty()) {
+            userRepository.save(user);
+        }
+        return changes;
     }
+
 
     @Override
     public void deleteUser(Long Id) {
