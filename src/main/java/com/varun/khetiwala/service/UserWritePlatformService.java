@@ -1,4 +1,10 @@
 package com.varun.khetiwala.service;
 
-public class UserWritePlatformService {
+import com.varun.khetiwala.domain.User;
+
+public interface UserWritePlatformService {
+
+    public User createUser(User user);
+    public User updateUser(User user);
+    public void deleteUser(Long Id);
 }
