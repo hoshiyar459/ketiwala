@@ -2,11 +2,11 @@ package com.varun.khetiwala.api;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.varun.khetiwala.data.UpdateUserRequest;
 import com.varun.khetiwala.domain.RoleEnum;
 import com.varun.khetiwala.domain.User;
 import com.varun.khetiwala.exception.PlatformDataIntegrityException;
 import com.varun.khetiwala.helper.EnumOptionData;
-import com.varun.khetiwala.helper.JsonCommand;
 import com.varun.khetiwala.service.UserWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,32 +53,18 @@ public class UserApiResource {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody JsonNode requestJson) {
-        JsonCommand command = new JsonCommand(requestJson);
-        Map<String, Object> response = userWritePlatformService.updateUser(id, command);
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
+        Map<String, Object> result = userWritePlatformService.updateUser(id, request);
 
-        String status = (String) response.get("status");
-
-        switch (status) {
-            case "success":
-                return ResponseEntity.ok(response);
-
-            case "no_change":
-                return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(response);
-            case "error":
-                String message = (String) response.get("message");
-                if (message.contains("not found")) {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-                } else {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-                }
-            default:
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                        "status", "error",
-                        "message", "Unexpected error"
-                ));
+        if (result.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(Map.of(
+                    "status", "no_change"
+            ));
         }
+
+        return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "changes", result
+        ));
     }
-
-
 }

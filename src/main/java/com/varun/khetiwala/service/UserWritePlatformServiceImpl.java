@@ -1,15 +1,15 @@
 package com.varun.khetiwala.service;
 
-import com.varun.khetiwala.domain.RoleEnum;
+import com.varun.khetiwala.data.UpdateUserRequest;
 import com.varun.khetiwala.domain.User;
 import com.varun.khetiwala.exception.PlatformDataIntegrityException;
-import com.varun.khetiwala.helper.JsonCommand;
 import com.varun.khetiwala.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class UserWritePlatformServiceImpl implements UserWritePlatformService{
@@ -43,22 +43,42 @@ public class UserWritePlatformServiceImpl implements UserWritePlatformService{
         }
     }
 
-@Override
-    public Map<String, Object> updateUser(Long id, JsonCommand command) {
+    @Override
+    public Map<String, Object> updateUser(Long id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Map<String, Object> changes = user.update(command);
+        Map<String, Object> changes = new LinkedHashMap<>();
+
+        updateField("username", user.getUsername(), request.getUsername(), changes, user::setUsername);
+        updateField("email", user.getEmail(), request.getEmail(), changes, user::setEmail);
+        updateField("mobileNumber", user.getMobileNumber(), request.getMobileNumber(), changes, user::setMobileNumber);
+        updateField("password", user.getPassword(), request.getPassword(), changes, user::setPassword);
+        updateField("profilePic", user.getProfilePic(), request.getProfilePic(), changes, user::setProfilePic);
+        updateField("role", user.getRole(), request.getRole(), changes, user::setRole);
 
         if (!changes.isEmpty()) {
             userRepository.save(user);
         }
+
         return changes;
     }
+
 
 
     @Override
     public void deleteUser(Long Id) {
 
     }
+
+
+    private <T> void updateField(String fieldName, T currentValue, T newValue,
+                                 Map<String, Object> changes, java.util.function.Consumer<T> setter) {
+        if (newValue != null && !Objects.equals(currentValue, newValue)) {
+            setter.accept(newValue);
+            changes.put(fieldName, newValue);
+        }
+    }
+
+
 }
