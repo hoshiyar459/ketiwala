@@ -1,7 +1,5 @@
 package com.varun.khetiwala.api;
 
-
-import com.fasterxml.jackson.databind.JsonNode;
 import com.varun.khetiwala.data.UpdateUserRequest;
 import com.varun.khetiwala.domain.RoleEnum;
 import com.varun.khetiwala.domain.User;
@@ -61,7 +59,6 @@ public class UserApiResource {
                     "status", "no_change"
             ));
         }
-
         return ResponseEntity.ok(Map.of(
                 "status", "success",
                 "changes", result
